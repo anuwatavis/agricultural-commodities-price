@@ -1,0 +1,21 @@
+name: task-scheduler
+on:
+  push:
+    branches:
+      - main
+jobs:
+  initial-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Repository
+        uses: actions/checkout@v2.4.0
+      - name: Setup Python Environment
+        uses: actions/setup-python@v2.2.2
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run Python
+        working-directory: rubber
+        run: |
+          python scrap_rubber_price.py
