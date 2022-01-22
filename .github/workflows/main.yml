@@ -1,8 +1,8 @@
 name: rubber-task-scheduler
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: "0 1 * * *" #01 Hour UTC = 8 Hour GMT+7
+  workflow_dispatch:
 jobs:
   robber-data-collection:
     runs-on: ubuntu-latest
