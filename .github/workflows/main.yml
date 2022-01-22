@@ -1,21 +1,99 @@
-name: task-scheduler
+name: rubber-task-scheduler
 on:
   push:
     branches:
       - main
 jobs:
-  initial-testing:
+  robber-data-collection:
     runs-on: ubuntu-latest
     steps:
       - name: Check Repository
         uses: actions/checkout@v2.4.0
       - name: Setup Python Environment
         uses: actions/setup-python@v2.2.2
+        with:
+          python-version: "3.8"
+          architecture: x64
+      - name: Cache Python Environmaent
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          ls -a
+      - name: Setup Chromedriver
+        uses: nanasess/setup-chromedriver@master
       - name: Run Python
         working-directory: rubber
         run: |
-          python scrap_rubber_price.py
+          python scrape_rubber_price.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: rubber_data
+          path: |
+            dataset/*
+  create-pre-data-before-commit-to-wiki:
+    needs: [robber-data-collection]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Repository
+        uses: actions/checkout@v2.4.0
+      - name: Setup Python Environment
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: "3.8"
+          architecture: x64
+      - name: Cache Python Environmaent
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          ls -a
+      - name: Download rubber Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: rubber_data
+          path: wiki/rubber_data
+      - name: Run Python
+        working-directory: rubber
+        run: |
+          python create_data_before_commit.py
+      - name: Check File
+        run: |
+          ls dataset
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: rubber_data_final
+          path: |
+            dataset/*
+  commit-to-wiki:
+    needs: [create-pre-data-before-commit-to-wiki, robber-data-collection]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Repo
+        uses: actions/checkout@v2.3.4
+      - name: Download rubber Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: rubber_data_final
+          path: |
+            wiki/rubber_data
+      - name: Check file
+        run: |
+          ls -a
+          ls wiki
+      - name: Upload JSON to Github Wiki
+        uses: kai-tub/external-repo-sync-action@v1
+        with:
+          source-directory: "./wiki"
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
