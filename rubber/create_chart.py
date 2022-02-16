@@ -17,7 +17,7 @@ def create_line_chart(dataframe_input, label):
   latex_price = dataframe_input.loc[0:, ["date", label]]
   latex_price["date"] =  pd.to_datetime(latex_price['date'])
   latex_price['date'] = latex_price["date"].dt.strftime("%y-%m-%d")
-  plt.figure(figsize=(10,5))
+  plt.figure(figsize=(10,8))
   plt.xticks(rotation=90)
   plt.plot(latex_price['date'], latex_price[label], label=label, marker='o')
   plt.legend()
