@@ -2,6 +2,7 @@ from venv import create
 import pandas as pd
 import requests
 import matplotlib.pyplot as plt
+import os
 
 URL = 'https://raw.githubusercontent.com/wiki/anuwatavis/agricultural-commodities-price/rubber_data/rubber_price_2022.json'
 
@@ -24,6 +25,7 @@ def create_line_chart(dataframe_input, label):
 	
 
 if __name__ == '__main__':
+	os.makedirs("../chart", exist_ok=True)
 	rubber_df = get_rubber_data()
 	create_line_chart(rubber_df, 'latex_price')
 	create_line_chart(rubber_df, 'raw_robber_price')
