@@ -136,4 +136,26 @@ jobs:
           name: chart
           path: |
             chart/*
+  commit-chart-to-wiki:
+    needs: [crate-chart]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Repo
+        uses: actions/checkout@v2.3.4
+      - name: Download rubber Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: chart
+          path: |
+            wiki/rubber_chart
+      - name: Check file
+        run: |
+          ls -a
+          ls wiki
+      - name: Upload Chart to Github Wiki
+        uses: kai-tub/external-repo-sync-action@v1
+        with:
+          source-directory: "./wiki"
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 
